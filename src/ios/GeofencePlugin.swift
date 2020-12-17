@@ -497,7 +497,7 @@ class GeoNotificationManager : NSObject, CLLocationManagerDelegate, UNUserNotifi
             if let text = geo["notification"]["text"] as JSON? {
                 content.body = text.stringValue
             }
-            content.sound = UNNotificationSound.default()
+            content.sound = UNNotificationSound.default
             if let json = geo["notification"]["data"] as JSON? {
                 content.userInfo = ["geofence.notification.data": json.rawString(String.Encoding.utf8.rawValue, options: [])!]
             }
