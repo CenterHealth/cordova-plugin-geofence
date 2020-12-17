@@ -46,7 +46,8 @@
 		<source-file src="src/android/TransitionJobService.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/RemoveGeofenceCommand.java" target-dir="src/com/cowbell/cordova/geofence" />
 
-		<preference name="GOOGLE_API_VERSION" default="11.8.0" />
+		<preference name="GOOGLE_API_VERSION" default="16.+" />
+        <preference name="ANDROID_GSON_VERSION" default="2.3" />
 		<framework src="com.google.android.gms:play-services-location:$GOOGLE_API_VERSION"/>
 
         <config-file target="config.xml" parent="/*">
