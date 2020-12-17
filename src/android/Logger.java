@@ -38,6 +38,15 @@ public class Logger {
         return logger;
     }
 
+    public static Logger getLogger(Context appContext) {
+        if(logger == null) {
+            Logger defaultLogger = new Logger(GeofencePlugin.TAG, appContext, false);
+            setLogger(defaultLogger);
+        }
+
+        return logger;
+    }
+
     public static void setLogger(Logger logger) {
         synchronized (mutex) {
             Logger.logger = logger;

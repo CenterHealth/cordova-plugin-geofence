@@ -8,12 +8,14 @@ import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
 
 import org.apache.cordova.CallbackContext;
-import org.apache.cordova.PluginResult;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.cowbell.cordova.geofence.AddGeofenceCommand.INITIAL_TRIGGER_NONE;
 
 public class GeoNotificationManager {
     private Context context;
@@ -26,12 +28,13 @@ public class GeoNotificationManager {
     public GeoNotificationManager(Context context) {
         this.context = context;
         geoNotificationStore = new GeoNotificationStore(context);
-        logger = Logger.getLogger();
+        logger = Logger.getLogger(context);
         googleServiceCommandExecutor = new GoogleServiceCommandExecutor();
         pendingIntent = getTransitionPendingIntent();
         if (areGoogleServicesAvailable()) {
             logger.log(Log.DEBUG, "Google play services available");
-        } else {
+        }
+        else {
             logger.log(Log.WARN, "Google play services not available. Geofence plugin will not work correctly.");
         }
     }
@@ -44,7 +47,7 @@ public class GeoNotificationManager {
         }
         if (!geoFences.isEmpty()) {
             googleServiceCommandExecutor.QueueToExecute(
-                new AddGeofenceCommand(context, pendingIntent, geoFences)
+                    new AddGeofenceCommand(context, pendingIntent, geoFences, INITIAL_TRIGGER_NONE)
             );
         }
     }
@@ -60,22 +63,30 @@ public class GeoNotificationManager {
 
         if (ConnectionResult.SUCCESS == resultCode) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
 
     public void addGeoNotifications(List<GeoNotification> geoNotifications,
                                     final CallbackContext callback) {
+        this.addGeoNotifications(geoNotifications, callback, GeofencingRequest.INITIAL_TRIGGER_ENTER);
+    }
+
+    public void addGeoNotifications(List<GeoNotification> geoNotifications,
+                                    final CallbackContext callback,
+                                    int initialTrigger) {
         List<Geofence> newGeofences = new ArrayList<Geofence>();
         for (GeoNotification geo : geoNotifications) {
             geoNotificationStore.setGeoNotification(geo);
             newGeofences.add(geo.toGeofence());
         }
         AddGeofenceCommand geoFenceCmd = new AddGeofenceCommand(
-            context,
-            pendingIntent,
-            newGeofences
+                context,
+                pendingIntent,
+                newGeofences,
+                initialTrigger
         );
         if (callback != null) {
             geoFenceCmd.addListener(new CommandExecutionHandler(callback));
@@ -108,9 +119,10 @@ public class GeoNotificationManager {
      * geofence transition occurs.
      */
     private PendingIntent getTransitionPendingIntent() {
-        Intent intent = new Intent(context, ReceiveTransitionsIntentService.class);
-        logger.log(Log.DEBUG, "Geofence Intent created!");
-        return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(context, ReceiveTransitionsReceiver.class);
+        //intent.setAction(ReceiveTransitionsReceiver.GeofenceTransitionIntent);
+        logger.log(Log.DEBUG, "Geofence broadcast intent created");
+        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
 }

@@ -1,10 +1,10 @@
 package com.cowbell.cordova.geofence;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.List;
@@ -21,21 +21,20 @@ public class RemoveGeofenceCommand extends AbstractGoogleServiceCommand {
     protected void ExecuteCustomCode() {
         if (geofencesIds != null && geofencesIds.size() > 0) {
             logger.log(Log.DEBUG, "Removing geofences...");
-            LocationServices.GeofencingApi
-                .removeGeofences(mGoogleApiClient, geofencesIds)
-                .setResultCallback(new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(Status status) {
-                        if (status.isSuccess()) {
-                            logger.log(Log.DEBUG, "Geofences successfully removed");
-                            CommandExecuted();
-                        } else {
-                            String message = "Removing geofences failed - " + status.getStatusMessage();
-                            logger.log(Log.ERROR, message);
-                            CommandExecuted(new Error(message));
-                        }
-                    }
-                });
+
+            GeofencingClient geofencingClient = LocationServices.getGeofencingClient(this.context);
+            geofencingClient
+                    .removeGeofences(geofencesIds)
+                    .addOnSuccessListener((Void aVoid) ->
+                    {
+                        logger.log(Log.DEBUG, "Geofences successfully removed");
+                        CommandExecuted();
+                    })
+                    .addOnFailureListener((@NonNull Exception e) -> {
+                        String message = "Removing geofences failed - " + e.getMessage();
+                        logger.log(Log.ERROR, message);
+                        CommandExecuted(new Error(message));
+                    });
         } else {
             logger.log(Log.DEBUG, "Tried to remove Geofences when there were none");
             CommandExecuted();

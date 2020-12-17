@@ -4,10 +4,10 @@ import android.media.AudioManager;
 import android.media.ToneGenerator;
 
 public class BeepHelper {
-    private ToneGenerator toneGenerator;
+    private static ToneGenerator toneGenerator;
 
     public BeepHelper() {
-        toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
+        if (toneGenerator == null) toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
     }
 
     /**

@@ -28,7 +28,7 @@ public abstract class AbstractGoogleServiceCommand implements
             .addOnConnectionFailedListener(this)
             .addApi(LocationServices.API)
             .build();
-        logger = Logger.getLogger();
+        logger = Logger.getLogger(context);
         listeners = new ArrayList<IGoogleServiceCommandListener>();
     }
 

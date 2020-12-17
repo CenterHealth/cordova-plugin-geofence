@@ -1,10 +1,13 @@
 package com.cowbell.cordova.geofence;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.util.Log;
 import android.Manifest;
+import android.app.NotificationManager;
+
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -16,7 +19,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class GeofencePlugin extends CordovaPlugin {
@@ -27,9 +32,12 @@ public class GeofencePlugin extends CordovaPlugin {
     public static final String ERROR_GEOFENCE_NOT_AVAILABLE = "GEOFENCE_NOT_AVAILABLE";
     public static final String ERROR_GEOFENCE_LIMIT_EXCEEDED = "GEOFENCE_LIMIT_EXCEEDED";
 
+    private static HashMap<String, Long> snoozedFences = new HashMap<>();
+
     private GeoNotificationManager geoNotificationManager;
     private Context context;
-    public static CordovaWebView webView = null;
+
+    private static WeakReference<CordovaWebView> webView = null;
 
     private class Action {
         public String action;
@@ -55,18 +63,24 @@ public class GeofencePlugin extends CordovaPlugin {
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
-        GeofencePlugin.webView = webView;
+        GeofencePlugin.webView = new WeakReference<CordovaWebView>(webView);
         context = this.cordova.getActivity().getApplicationContext();
         Logger.setLogger(new Logger(TAG, context, false));
         geoNotificationManager = new GeoNotificationManager(context);
     }
 
     @Override
+    public void onNewIntent(Intent intent) {
+        String data = intent.getStringExtra("geofence.notification.data");
+        if (data != null) {
+            onNotificationClicked(data);
+        }
+    }
+
+    @Override
     public boolean execute(final String action, final JSONArray args,
                            final CallbackContext callbackContext) throws JSONException {
-        Log.d(TAG, "GeofencePlugin execute action: " + action + " args: " + args.toString());
         executedAction = new Action(action, args, callbackContext);
-
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
                 if (action.equals("addOrUpdate")) {
@@ -89,10 +103,21 @@ public class GeofencePlugin extends CordovaPlugin {
                 } else if (action.equals("getWatched")) {
                     List<GeoNotification> geoNotifications = geoNotificationManager.getWatched();
                     callbackContext.success(Gson.get().toJson(geoNotifications));
+                } else if (action.equals("dismissNotifications")) {
+                    NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                    for (int i = 0; i < args.length(); i++) {
+                        manager.cancel(args.optInt(i));
+                    }
+                } else if (action.equals("snooze")) {
+                    snoozedFences.put(args.optString(0), System.currentTimeMillis() + args.optLong(1) * 1000);
                 } else if (action.equals("initialize")) {
                     initialize(callbackContext);
                 } else if (action.equals("deviceReady")) {
-                    deviceReady();
+                    Intent intent = cordova.getActivity().getIntent();
+                    String data = intent.getStringExtra("geofence.notification.data");
+                    if (data != null) {
+                        onNotificationClicked(data);
+                    }
                 }
             }
         });
@@ -110,25 +135,16 @@ public class GeofencePlugin extends CordovaPlugin {
     }
 
     public static void onTransitionReceived(List<GeoNotification> notifications) {
-      Log.d(TAG, "Transition Event Received");
-      String js = "geofence.onTransitionReceived(" + Gson.get().toJson(notifications) + ");";
-
-        if (webView == null) {
-            Log.d(TAG, "Webview is null");
-        } else {
-            webView.sendJavascript(js);
-        }
+        Log.d(TAG, "Transition Event Received!");
+        String js = "setTimeout('geofence.onTransitionReceived("
+            + Gson.get().toJson(notifications) + ")',0)";
+        sendJavascript(js);
     }
 
-    private void deviceReady() {
-        Intent intent = cordova.getActivity().getIntent();
-        String data = intent.getStringExtra("geofence.notification.data");
-        String js = "geofence.onNotificationClicked(" + data + ");";
-
-        if (data == null) {
-            Log.d(TAG, "No notifications clicked.");
-        } else {
-            webView.sendJavascript(js);
+    private void onNotificationClicked(String data) {
+        if (data != null) {
+            String js = "setTimeout('geofence.onNotificationClicked(" + data + ")',0)";
+            sendJavascript(js);
         }
     }
 
@@ -143,6 +159,11 @@ public class GeofencePlugin extends CordovaPlugin {
         } else {
             callbackContext.success();
         }
+    }
+
+    public static boolean isSnoozed(String id) {
+        Long fenceTime = snoozedFences.get(id);
+        return fenceTime != null && fenceTime > System.currentTimeMillis();
     }
 
     private boolean hasPermissions(String[] permissions) {
@@ -171,5 +192,21 @@ public class GeofencePlugin extends CordovaPlugin {
             execute(executedAction);
             executedAction = null;
         }
+    }
+
+    private static synchronized void sendJavascript(final String js) {
+
+        if (webView == null) {
+            Log.e(TAG, "Device isn't ready.");
+            return;
+        }
+
+        final CordovaWebView view = webView.get();
+
+        ((Activity)(view.getContext())).runOnUiThread(new Runnable() {
+            public void run() {
+                view.loadUrl("javascript:" + js);
+            }
+        });
     }
 }
