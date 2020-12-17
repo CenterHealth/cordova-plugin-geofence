@@ -1285,84 +1285,74 @@ public struct SwiftData {
         //execute a SQLite query from a SQL String
         func executeQuery(_ sqlStr: String, withArgs: [AnyObject]? = nil) -> (result: [SDRow], error: Int?) {
 
-            var resultSet = [SDRow]()
-
-            var sql = sqlStr
-            if let args = withArgs {
-                let result = bind(args, toSQL: sql)
-                if let err = result.error {
-                    return (resultSet, err)
-                } else {
-                    sql = result.string
-                }
-            }
-
-            var pStmt: OpaquePointer? = nil
-            var status = sqlite3_prepare_v2(SQLiteDB.sharedInstance.sqliteDB, sql, -1, &pStmt, nil)
-            if status != SQLITE_OK {
-                print("SwiftData Error -> During: SQL Prepare")
-                print("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
-                if let errMsg = String(validatingUTF8: sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB)) {
-                    print("                -> Details: \(errMsg)")
-                }
-                sqlite3_finalize(pStmt)
-                return (resultSet, Int(status))
-            }
-
-            var columnCount: Int32 = 0
-            var next = true
-            while next {
-                status = sqlite3_step(pStmt)
-                if status == SQLITE_ROW {
-                    columnCount = sqlite3_column_count(pStmt)
-                    var row = SDRow()
-                    for i: Int32 in 0 ..< columnCount {
-                    //for var i: Int32 = 0; i < columnCount; ++i {
-                        let columnName = String(cString: sqlite3_column_name(pStmt, i))
-                        if let columnType = String(validatingUTF8: sqlite3_column_decltype(pStmt, i))?.uppercased() {
-                            if let columnValue: AnyObject = getColumnValue(pStmt!, index: i, type: columnType) {
-                                row[columnName] = SDColumn(obj: columnValue)
-                            }
+                    var resultSet = [SDRow]()
+                    var sql = sqlStr
+                    if let args = withArgs {
+                        let result = bind(args, toSQL: sql)
+                        if let err = result.error {
+                            return (resultSet, err)
                         } else {
-                            var columnType = ""
-                            switch sqlite3_column_type(pStmt, i) {
-                            case 1:
-                                columnType = "INTEGER"
-                            case 2:
-                                columnType = "FLOAT"
-                            case 3:
-                                columnType = "TEXT"
-                            case 4:
-                                columnType = "BLOB"
-                            case 5:
-                                columnType = "NULL"
-                            default:
-                                columnType = "NULL"
-                            }
-                            if let columnValue: AnyObject = getColumnValue(pStmt!, index: i, type: columnType) {
-                                row[columnName] = SDColumn(obj: columnValue)
-                            }
+                            sql = result.string
                         }
                     }
-                    resultSet.append(row)
-                } else if status == SQLITE_DONE {
-                    next = false
-                } else {
-                    print("SwiftData Error -> During: SQL Step")
-                    print("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
-                    if let errMsg = String(validatingUTF8: sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB)) {
-                        print("                -> Details: \(errMsg)")
+                    var pStmt: OpaquePointer? = nil
+                    var status = sqlite3_prepare_v2(SQLiteDB.sharedInstance.sqliteDB, sql, -1, &pStmt, nil)
+                    if status != SQLITE_OK {
+                        print("SwiftData Error -> During: SQL Prepare")
+                        print("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                        if let errMsg = String(validatingUTF8: sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB)) {
+                            print("                -> Details: \(errMsg)")
+                        }
+                        sqlite3_finalize(pStmt)
+                        return (resultSet, Int(status))
+                    }
+                    var columnCount: Int32 = 0
+                    var next = true
+                    while next {
+                        status = sqlite3_step(pStmt)
+                        if status == SQLITE_ROW {
+                            columnCount = sqlite3_column_count(pStmt)
+                            var row = SDRow()
+                            for i: Int32 in 0 ..< columnCount {
+                                let columnName = String(cString: sqlite3_column_name(pStmt, i))
+                                var columnType = ""
+                                switch sqlite3_column_type(pStmt, i) {
+                                case 1:
+                                    columnType = "INTEGER"
+                                case 2:
+                                    columnType = "FLOAT"
+                                case 3:
+                                    columnType = "TEXT"
+                                case 4:
+                                    columnType = "BLOB"
+                                case 5:
+                                    columnType = "NULL"
+                                default:
+                                    columnType = "NULL"
+                                }
+                                if let columnValue: AnyObject = getColumnValue(pStmt!, index: i, type: columnType) {
+                                    row[columnName] = SDColumn(obj: columnValue)
+                                }
+                            }
+                            resultSet.append(row)
+                        } else if status == SQLITE_DONE {
+                            next = false
+                        } else {
+                            print("SwiftData Error -> During: SQL Step")
+                            print("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                            if let errMsg = String(validatingUTF8: sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB)) {
+                                print("                -> Details: \(errMsg)")
+                            }
+                            sqlite3_finalize(pStmt)
+                            return (resultSet, Int(status))
+                        }
                     }
                     sqlite3_finalize(pStmt)
-                    return (resultSet, Int(status))
+                    return (resultSet, nil)
+
                 }
 
             }
-
-            sqlite3_finalize(pStmt)
-
-            return (resultSet, nil)
-        }
 
     }
 
