@@ -882,27 +882,25 @@ public struct SwiftData {
     - returns:      The ID of the saved image as a String, or nil if there was an error saving the image to disk
     */
     public static func saveUIImage(_ image: UIImage) -> String? {
-
-        let docsPath = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true)[0]
-        let imageDirPath = docsPath.stringByAppendingPathComponent("SwiftDataImages")
-
-        if !FileManager.default.fileExists(atPath: imageDirPath) {
+        let dirUrl = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)[0].appendingPathComponent("DataImages")
+        if !FileManager.default.fileExists(atPath: dirUrl.path) {
             do {
-                try FileManager.default.createDirectory(atPath: imageDirPath, withIntermediateDirectories: false, attributes: nil)
-            } catch _ {
+                try FileManager.default.createDirectory(at: dirUrl, withIntermediateDirectories: false, attributes: nil)
+            } catch _ as NSError {
                 print("Error creating SwiftData image folder")
                 return nil
             }
         }
-
         let imageID = UUID().uuidString
-
-        let imagePath = imageDirPath.stringByAppendingPathComponent(imageID)
-
-        let imageAsData = UIImagePNGRepresentation(image)
-        if !((try? imageAsData!.write(to: URL(fileURLWithPath: imagePath), options: [.atomic])) != nil) {
-            print("Error saving image")
-            return nil
+        let imageUrl = dirUrl.appendingPathComponent(imageID);
+        let imageAsData = image.pngData()
+        if let _ = imageAsData  {
+            if !((try? imageAsData!.write(to: imageUrl, options: [.atomic])) != nil) {
+                            print("Error saving image")
+                            return nil
+                        }
+        }  else {
+            return nil;
         }
 
         return imageID
