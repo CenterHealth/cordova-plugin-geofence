@@ -896,7 +896,7 @@ public struct SwiftData {
 
         let imagePath = imageDirPath.stringByAppendingPathComponent(imageID)
 
-        let imageAsData = UIImagePNGRepresentation(image)
+        let imageAsData = image.pngData()
         if !((try? imageAsData!.write(to: URL(fileURLWithPath: imagePath), options: [.atomic])) != nil) {
             print("Error saving image")
             return nil
@@ -1541,15 +1541,12 @@ extension SwiftData.SQLiteDB {
     func escapeValue(_ obj: AnyObject?) -> String {
 
         if let obj: AnyObject = obj {
-
             if obj is String {
                 return "'\(escapeStringValue(obj as! String))'"
             }
-
             if obj is Double || obj is Int {
                 return "\(obj)"
             }
-
             if obj is Bool {
                 if obj as! Bool {
                     return "1"
@@ -1557,25 +1554,21 @@ extension SwiftData.SQLiteDB {
                     return "0"
                 }
             }
-
             if obj is Data {
                 let str = "\(obj)"
                 var newStr = ""
-                for char in str.characters {
+                for char in str {
                     if char != "<" && char != ">" && char != " " {
                         newStr.append(char)
                     }
                 }
-
                 return "X'\(newStr)'"
             }
-
             if obj is Date {
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                return "\(escapeValue(dateFormatter.string(from: obj as! Date) as AnyObject))"
+                return "\(escapeValue(dateFormatter.string(from: obj as! Date) as AnyObject?))"
             }
-
             if obj is UIImage {
                 if let imageID = SD.saveUIImage(obj as! UIImage) {
                     return "'\(escapeStringValue(imageID))'"
@@ -1583,10 +1576,8 @@ extension SwiftData.SQLiteDB {
                 print("SwiftData Warning -> Cannot save image, NULL will be inserted into the database")
                 return "NULL"
             }
-
             print("SwiftData Warning -> Object \"\(obj)\" is not a supported type and will be inserted into the database as NULL")
             return "NULL"
-
         } else {
             return "NULL"
         }
