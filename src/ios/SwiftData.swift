@@ -20,7 +20,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 import Foundation
 import SQLite3
 import UIKit
@@ -31,7 +30,6 @@ public struct SwiftData {
 
 
     // MARK: - Public SwiftData Functions
-
     // MARK: - Execute Statements
     /**
     Execute a non-query SQL statement (e.g. INSERT, UPDATE, DELETE, etc.)
@@ -474,7 +472,6 @@ public struct SwiftData {
 
 
     // MARK: - Misc
-
     /**
     Obtain the error message relating to the provided error code
     - parameter code:  The error code provided
@@ -882,25 +879,27 @@ public struct SwiftData {
     - returns:      The ID of the saved image as a String, or nil if there was an error saving the image to disk
     */
     public static func saveUIImage(_ image: UIImage) -> String? {
-        let dirUrl = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)[0].appendingPathComponent("DataImages")
-        if !FileManager.default.fileExists(atPath: dirUrl.path) {
+
+        let docsPath = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true)[0]
+        let imageDirPath = docsPath.stringByAppendingPathComponent("SwiftDataImages")
+
+        if !FileManager.default.fileExists(atPath: imageDirPath) {
             do {
-                try FileManager.default.createDirectory(at: dirUrl, withIntermediateDirectories: false, attributes: nil)
-            } catch _ as NSError {
+                try FileManager.default.createDirectory(atPath: imageDirPath, withIntermediateDirectories: false, attributes: nil)
+            } catch _ {
                 print("Error creating SwiftData image folder")
                 return nil
             }
         }
+
         let imageID = UUID().uuidString
-        let imageUrl = dirUrl.appendingPathComponent(imageID);
-        let imageAsData = image.pngData()
-        if let _ = imageAsData  {
-            if !((try? imageAsData!.write(to: imageUrl, options: [.atomic])) != nil) {
-                            print("Error saving image")
-                            return nil
-                        }
-        }  else {
-            return nil;
+
+        let imagePath = imageDirPath.stringByAppendingPathComponent(imageID)
+
+        let imageAsData = UIImagePNGRepresentation(image)
+        if !((try? imageAsData!.write(to: URL(fileURLWithPath: imagePath), options: [.atomic])) != nil) {
+            print("Error saving image")
+            return nil
         }
 
         return imageID
@@ -1496,7 +1495,7 @@ extension SwiftData.SQLiteDB {
         var newSql = ""
         var bindIndex = 0
         var i = false
-        for char in sql.characters {
+        for char in sql {
             if char == "?" {
                 if bindIndex > objects.count - 1 {
                     print("SwiftData Error -> During: Object Binding")
@@ -1512,7 +1511,8 @@ extension SwiftData.SQLiteDB {
                         print("                -> Code: 203 - Object to bind as identifier must be a String at array location: \(bindIndex)")
                         return ("", 203)
                     }
-                    newSql = newSql.substring(to: newSql.characters.index(before: newSql.endIndex))
+                    let idx = newSql.index(before: newSql.endIndex)
+                    newSql = String(newSql[..<idx])
                 } else {
                     obj = escapeValue(objects[bindIndex])
                 }
@@ -1527,15 +1527,15 @@ extension SwiftData.SQLiteDB {
                 i = false
             }
         }
-
         if bindIndex != objects.count {
             print("SwiftData Error -> During: Object Binding")
             print("                -> Code: 202 - Too many objects to bind provided")
             return ("", 202)
         }
-
         return (newSql, nil)
+
     }
+
 
     //return escaped String value of AnyObject
     func escapeValue(_ obj: AnyObject?) -> String {
@@ -1604,26 +1604,24 @@ extension SwiftData.SQLiteDB {
     //escape string
     func escapeStringValue(_ str: String) -> String {
         var escapedStr = ""
-        for char in str.characters {
+        for char in str {
             if char == "'" {
                 escapedStr += "'"
             }
             escapedStr.append(char)
         }
-
         return escapedStr
     }
 
     //escape string
     func escapeStringIdentifier(_ str: String) -> String {
         var escapedStr = ""
-        for char in str.characters {
+        for char in str {
             if char == "\"" {
                 escapedStr += "\""
             }
             escapedStr.append(char)
         }
-
         return escapedStr
     }
 
