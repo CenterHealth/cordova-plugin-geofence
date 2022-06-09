@@ -34,6 +34,9 @@
         <source-file src="src/android/GeoNotificationManager.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/GeoNotificationNotifier.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/GeoNotificationStore.java" target-dir="src/com/cowbell/cordova/geofence" />
+        <source-file src="src/android/GeofenceTransitionsJobIntentService.java" target-dir="src/com/cowbell/cordova/geofence" />
+        <source-file src="src/android/GeofenceBroadcastReceiver.java" target-dir="src/com/cowbell/cordova/geofence" />
+        <source-file src="src/android/GeofenceErrorMessages.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/GeofencePlugin.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/GoogleServiceCommandExecutor.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/Gson.java" target-dir="src/com/cowbell/cordova/geofence" />
@@ -58,7 +61,10 @@
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
-            <receiver android:exported="true" android:label="@string/app_name" 						android:name="com.cowbell.cordova.geofence.ReceiveTransitionsReceiver" />
+            <receiver
+                    android:name="com.cowbell.cordova.geofence.GeofenceBroadcastReceiver"
+                    android:enabled="true"
+                    android:exported="true" />
         </config-file>
 		
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
@@ -67,12 +73,17 @@
 		        android:permission="android.permission.BIND_JOB_SERVICE"
 		        android:exported="true">
 		    </service>
+            <service
+                    android:name="com.cowbell.cordova.geofence.GeofenceTransitionsJobIntentService"
+                    android:exported="true"
+                    android:permission="android.permission.BIND_JOB_SERVICE" />
 		</config-file>
 		
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
             <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
             <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+            <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
             <uses-permission android:name="android.permission.VIBRATE" />
         </config-file>
 

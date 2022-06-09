@@ -127,7 +127,16 @@ module.exports = {
      */
     ping: function (success, error) {
         return execPromise(success, error, "GeofencePlugin", "ping", []);
-    }
+    },
+    hasPermissions: function (success, error) {
+        return execPromise(success, error, "GeofencePlugin", "hasPermissions", []);
+    },
+    permissions: function (success, error) {
+        return execPromise(success, error, "GeofencePlugin", "permissions", []);
+    },
+     setItem: function (item, success, error) {
+        return execPromise(success, error, "GeofencePlugin", "setItem", item);
+     },
 };
 
 function execPromise(success, error, pluginName, method, args) {
