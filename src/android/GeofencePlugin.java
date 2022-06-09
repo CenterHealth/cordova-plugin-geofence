@@ -155,7 +155,7 @@ public class GeofencePlugin extends CordovaPlugin {
 
     private void onNotificationClicked(String data) {
         if (data != null) {
-            String js = "setTimeout('geofence.onNotificationClicked(" + data + ")',0)";
+            String js = "setTimeout('geofence.onNotificationClicked(" + data + ")', 100)";
             sendJavascript(js);
         }
     }
