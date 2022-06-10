@@ -27,6 +27,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class GeofencePlugin extends CordovaPlugin {
     public static final String TAG = "GeofencePlugin";
@@ -149,7 +150,7 @@ public class GeofencePlugin extends CordovaPlugin {
     public static void onTransitionReceived(List<GeoNotification> notifications) {
         Log.d(TAG, "Transition Event Received!");
         String js = "setTimeout('geofence.onTransitionReceived("
-            + Gson.get().toJson(notifications) + ")',0)";
+                + Gson.get().toJson(notifications) + ")',0)";
         sendJavascript(js);
     }
 
@@ -205,6 +206,14 @@ public class GeofencePlugin extends CordovaPlugin {
         PluginResult result;
 
         if (executedAction != null) {
+            if (Objects.equals(executedAction.action, "permissions") && permissionsGranted(allPermissions)) {
+                String js = "setTimeout('geofence.onAllPermissionsGranted()', 100)";
+                sendJavascript(js);
+                result = new PluginResult(PluginResult.Status.OK);
+                executedAction.callbackContext.sendPluginResult(result);
+                executedAction = null;
+                return;
+            }
             for (int r:grantResults) {
                 if (r == PackageManager.PERMISSION_DENIED) {
                     Log.d(TAG, "Permission Denied!");
