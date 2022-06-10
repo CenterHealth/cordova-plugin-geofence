@@ -206,8 +206,9 @@ public class GeofencePlugin extends CordovaPlugin {
         PluginResult result;
 
         if (executedAction != null) {
-            if (Objects.equals(executedAction.action, "permissions") && permissionsGranted(allPermissions)) {
-                String js = "setTimeout('geofence.onAllPermissionsGranted()', 100)";
+            if (Objects.equals(executedAction.action, "permissions")) {
+                boolean permissionsResult = permissionsGranted(allPermissions);
+                String js = "setTimeout('geofence.onPermissions(" + permissionsResult + ")', 100)";
                 sendJavascript(js);
                 result = new PluginResult(PluginResult.Status.OK);
                 executedAction.callbackContext.sendPluginResult(result);
