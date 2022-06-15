@@ -2,29 +2,18 @@ package com.cowbell.cordova.geofence;
 
 import com.google.android.gms.location.Geofence;
 import com.google.gson.annotations.Expose;
-import com.google.android.gms.location.GeofencingClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.location.GeofencingRequest;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.List;
 
 public class GeoNotification {
     @Expose public String _id;
     @Expose public String id;
     @Expose public String name;
     @Expose public String event;
-    @Expose public String home_id;
     @Expose public String user_id;
     @Expose public String w_actions;
     @Expose public double latitude;
@@ -37,8 +26,11 @@ public class GeoNotification {
     @Expose public String authorization;
     @Expose public String startTime;
     @Expose public String endTime;
+    @Expose public boolean isLast;
 
     @Expose public Notification notification;
+
+
 
     public GeoNotification() {
     }
@@ -104,19 +96,6 @@ public class GeoNotification {
             return format.parse(date);
         } catch (ParseException e) {
             return null;
-        }
-    }
-
-    public String getTransitionTypeString() {
-        switch (transitionType) {
-            case 1:
-                return "Enter";
-            case 2:
-                return "Exit";
-            case 4:
-                return "Dwell";
-            default:
-                return "Unknown";
         }
     }
 }

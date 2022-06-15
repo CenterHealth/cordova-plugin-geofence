@@ -1,12 +1,10 @@
 package com.cowbell.cordova.geofence;
 
-import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -22,12 +20,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import org.apache.cordova.CallbackContext;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cowbell.cordova.geofence.AddGeofenceCommand.INITIAL_TRIGGER_NONE;
 
 public class GeoNotificationManager implements OnCompleteListener<Void> {
     private Context context;

@@ -25,29 +25,24 @@
 
     <!-- android -->
     <platform name="android">
-        <source-file src="src/android/AbstractGoogleServiceCommand.java" target-dir="src/com/cowbell/cordova/geofence" />
-        <source-file src="src/android/AddGeofenceCommand.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/AssetUtil.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/BeepHelper.java" target-dir="src/com/cowbell/cordova/geofence" />
-        <source-file src="src/android/CommandExecutionHandler.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/GeoNotification.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/GeoNotificationManager.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/GeoNotificationNotifier.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/GeoNotificationStore.java" target-dir="src/com/cowbell/cordova/geofence" />
+        <source-file src="src/android/GeofenceJsEvent.java" target-dir="src/com/cowbell/cordova/geofence" />
+        <source-file src="src/android/GeofenceConfig.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/GeofenceTransitionsJobIntentService.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/GeofenceBroadcastReceiver.java" target-dir="src/com/cowbell/cordova/geofence" />
-        <source-file src="src/android/GeofenceErrorMessages.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/GeofencePlugin.java" target-dir="src/com/cowbell/cordova/geofence" />
-        <source-file src="src/android/GoogleServiceCommandExecutor.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/Gson.java" target-dir="src/com/cowbell/cordova/geofence" />
-        <source-file src="src/android/IGoogleServiceCommandListener.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/LocalStorage.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/LocalStorageDBHelper.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/Logger.java" target-dir="src/com/cowbell/cordova/geofence" />
         <source-file src="src/android/Notification.java" target-dir="src/com/cowbell/cordova/geofence" />
-        <source-file src="src/android/ReceiveTransitionsReceiver.java" target-dir="src/com/cowbell/cordova/geofence" />
+        <source-file src="src/android/NotificationDeliveryJob.java" target-dir="src/com/cowbell/cordova/geofence" />
 		<source-file src="src/android/TransitionJobService.java" target-dir="src/com/cowbell/cordova/geofence" />
-        <source-file src="src/android/RemoveGeofenceCommand.java" target-dir="src/com/cowbell/cordova/geofence" />
 
 		<preference name="GOOGLE_API_VERSION" default="16.+" />
         <preference name="ANDROID_GSON_VERSION" default="2.3" />
@@ -73,6 +68,11 @@
 		        android:permission="android.permission.BIND_JOB_SERVICE"
 		        android:exported="true">
 		    </service>
+            <service
+                    android:name="com.cowbell.cordova.geofence.NotificationDeliveryJob"
+                    android:permission="android.permission.BIND_JOB_SERVICE"
+                    android:exported="true">
+            </service>
             <service
                     android:name="com.cowbell.cordova.geofence.GeofenceTransitionsJobIntentService"
                     android:exported="true"
