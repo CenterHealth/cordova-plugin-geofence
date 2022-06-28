@@ -40,7 +40,6 @@ public class GeofencePlugin extends CordovaPlugin {
     private String[] allPermissions = {
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION
     };
     private static HashMap<String, Long> snoozedFences = new HashMap<>();
 
@@ -166,6 +165,11 @@ public class GeofencePlugin extends CordovaPlugin {
             Manifest.permission.ACCESS_FINE_LOCATION
         };
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            permissions[2] = Manifest.permission.ACCESS_BACKGROUND_LOCATION;
+        }
+
+
         if (!permissionsGranted(permissions)) {
             PermissionHelper.requestPermissions(this, 0, permissions);
         } else {
@@ -194,7 +198,9 @@ public class GeofencePlugin extends CordovaPlugin {
 
     private boolean permissionsGranted(String[] permissions) {
         for (String permission : permissions) {
-            if (!PermissionHelper.hasPermission(this, permission)) return false;
+            if (!PermissionHelper.hasPermission(this, permission)) {
+                return false;
+            }
         }
 
         return true;
