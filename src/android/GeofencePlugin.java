@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -160,18 +161,14 @@ public class GeofencePlugin extends CordovaPlugin {
     }
 
     private void initialize(CallbackContext callbackContext) {
-        String[] permissions = {
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        };
-
+        List<String> permissions = new ArrayList<String>(Arrays.asList(allPermissions));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            permissions[2] = Manifest.permission.ACCESS_BACKGROUND_LOCATION;
+            permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
         }
-
-
-        if (!permissionsGranted(permissions)) {
-            PermissionHelper.requestPermissions(this, 0, permissions);
+        String[] stringPermissions = new String[permissions.size()];
+        permissions.toArray(stringPermissions);
+        if (!permissionsGranted(stringPermissions)) {
+            PermissionHelper.requestPermissions(this, 0, stringPermissions);
         } else {
             callbackContext.error("Permission not granted");
         }
@@ -187,7 +184,13 @@ public class GeofencePlugin extends CordovaPlugin {
 
 
     private void permissions(CallbackContext callbackContext) {
-        PermissionHelper.requestPermissions(this, 0, allPermissions);
+        List<String> permissions = new ArrayList<String>(Arrays.asList(allPermissions));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+        }
+        String[] stringPermissions = new String[permissions.size()];
+        permissions.toArray(stringPermissions);
+        PermissionHelper.requestPermissions(this, 0, stringPermissions);
         callbackContext.success();
     }
 
