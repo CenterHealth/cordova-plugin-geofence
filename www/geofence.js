@@ -138,6 +138,9 @@ module.exports = {
      setItem: function (item, success, error) {
         return execPromise(success, error, "GeofencePlugin", "setItem", item);
      },
+    appLoaded: function (success, error) {
+        return execPromise(success, error, "GeofencePlugin", "appLoaded", []);
+    },
 };
 
 function execPromise(success, error, pluginName, method, args) {

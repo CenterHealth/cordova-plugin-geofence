@@ -135,6 +135,7 @@ public class GeoNotificationManager implements OnCompleteListener<Void> {
                     @Override
                     public void onSuccess(Void unused) {
                         logger.log(Log.DEBUG, "Geofences successfully added");
+                        callback.success();
                     }
                 });
     }

@@ -47,7 +47,7 @@ public class GeofencePlugin extends CordovaPlugin {
     private GeoNotificationManager geoNotificationManager;
     private Context context;
     protected GeoNotificationStore store;
-
+    private String lastNotificationData = null;
 
     private class Action {
         public String action;
@@ -138,7 +138,14 @@ public class GeofencePlugin extends CordovaPlugin {
                     Intent intent = cordova.getActivity().getIntent();
                     String data = intent.getStringExtra("geofence.notification.data");
                     if (data != null) {
-                        GeofenceJsEvent.onNotificationClicked(data);
+                        lastNotificationData = data;
+                    }
+                } else if (action.equals("appLoaded")) {
+                    if (lastNotificationData != null) {
+                        callbackContext.success(lastNotificationData);
+                        lastNotificationData = null;
+                    } else {
+                        callbackContext.success();
                     }
                 }
             }
