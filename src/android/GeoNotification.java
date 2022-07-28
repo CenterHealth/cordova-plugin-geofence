@@ -37,6 +37,7 @@ public class GeoNotification {
 
     public Geofence toGeofence() {
         if(transitionType == 1 || transitionType == 2){
+            // Setup geofence for ENTER or EXIT events
             return new Geofence.Builder()
                     .setRequestId(id)
                     .setTransitionTypes(transitionType )
@@ -44,6 +45,7 @@ public class GeoNotification {
                     .setCircularRegion(latitude, longitude, radius)
                     .setExpirationDuration(Long.MAX_VALUE).build();
         } else {
+            // Setup geofence for ENTER and EXIT events
             return new Geofence.Builder()
                     .setRequestId(id)
                     .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |Geofence.GEOFENCE_TRANSITION_EXIT )
