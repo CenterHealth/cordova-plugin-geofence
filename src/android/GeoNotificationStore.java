@@ -37,4 +37,13 @@ public class GeoNotificationStore {
     public void clear() {
         storage.clear();
     }
+
+    public GeofenceConfig getConfig () {
+        String objectJson = storage.getItem("geofence_config");
+        return Gson.get().fromJson(objectJson, GeofenceConfig.class);
+    }
+
+    public void setConfig (GeofenceConfig config) {
+        storage.setItem("geofence_config", Gson.get().toJson(config));
+    }
 }

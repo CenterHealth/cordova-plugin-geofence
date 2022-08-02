@@ -29,13 +29,14 @@ module.exports = {
      * Initializing geofence plugin
      *
      * @name initialize
+     * @param  {Object} config callback
      * @param  {Function} success callback
      * @param  {Function} error callback
      *
      * @return {Promise}
      */
-    initialize: function (success, error) {
-        return execPromise(success, error, "GeofencePlugin", "initialize", []);
+    initialize: function (config, success, error) {
+        return execPromise(success, error, 'GeofencePlugin', 'initialize', [config]);
     },
     /**
      * Adding new geofence to monitor.
@@ -127,7 +128,19 @@ module.exports = {
      */
     ping: function (success, error) {
         return execPromise(success, error, "GeofencePlugin", "ping", []);
-    }
+    },
+    hasPermissions: function (success, error) {
+        return execPromise(success, error, "GeofencePlugin", "hasPermissions", []);
+    },
+    permissions: function (success, error) {
+        return execPromise(success, error, "GeofencePlugin", "permissions", []);
+    },
+     setItem: function (item, success, error) {
+        return execPromise(success, error, "GeofencePlugin", "setItem", item);
+     },
+    appLoaded: function (success, error) {
+        return execPromise(success, error, "GeofencePlugin", "appLoaded", []);
+    },
 };
 
 function execPromise(success, error, pluginName, method, args) {

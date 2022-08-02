@@ -8,9 +8,12 @@ interface Window {
   geofence: GeofencePlugin;
   TransitionType: TransitionType;
 }
-
+interface GeofenceConfig {
+  delay?: number // Delay in seconds before triggering enter notification default 10
+}
 interface GeofencePlugin {
   initialize(
+    config?: GeofenceConfig ,
     successCallback?: (result: any) => void,
     errorCallback?: (error: string) => void
   ): Promise<any>;
@@ -36,6 +39,11 @@ interface GeofencePlugin {
     successCallback?: (result: any) => void,
     errorCallback?: (error: string) => void
   ): Promise<string>;
+
+  appLoaded(
+    successCallback?: (result: any) => void,
+    errorCallback?: (error: string) => void
+  ): Promise<any>;
 
   onTransitionReceived: (geofences: Geofence[]) => void;
   

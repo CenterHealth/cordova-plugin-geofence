@@ -5,28 +5,22 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.TaskStackBuilder;
 import android.util.Log;
 
 public class GeoNotificationNotifier {
     private NotificationManager notificationManager;
     private Context context;
-    private BeepHelper beepHelper;
     private Logger logger;
     private NotificationChannel notificationChannel;
 
     public GeoNotificationNotifier(NotificationManager notificationManager, Context context) {
         this.notificationManager = notificationManager;
         this.context = context;
-        this.beepHelper = new BeepHelper();
         this.logger = Logger.getLogger();
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            notificationChannel = new NotificationChannel("channelId", "channelName", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationChannel = new NotificationChannel("center", "Center", NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(notificationChannel);
         }
     }
@@ -67,14 +61,6 @@ public class GeoNotificationNotifier {
                     );
 
             mBuilder.setContentIntent(resultPendingIntent);
-        }
-        try {
-            Uri notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            Ringtone r = RingtoneManager.getRingtone(context, notificationSound);
-            r.play();
-        } catch (Exception e) {
-            beepHelper.startTone("beep_beep_beep");
-            e.printStackTrace();
         }
         notificationManager.notify(notification.id, mBuilder.build());
         logger.log(Log.DEBUG, notification.toString());
